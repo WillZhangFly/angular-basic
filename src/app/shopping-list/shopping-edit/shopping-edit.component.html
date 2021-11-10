@@ -31,11 +31,19 @@
           <button
             class="btn btn-success"
             type="submit"
+            style="margin-right: 10px;"
             [disabled]="!shoppingForm.valid"
           >
             {{editMode ? 'Update' : 'Add'}}
           </button>
-          <button class="btn btn-danger" type="button">Delete</button>
+          <button 
+            class="btn btn-danger mr-2" 
+            style="margin-right: 10px;"
+            type="button" 
+            *ngIf="editMode"
+            (click)="onDelete()">
+            Delete 
+          </button>
           <button class="btn btn-primary" type="button" (click)="onClear()">Clear</button>
         </div>
       </div>
