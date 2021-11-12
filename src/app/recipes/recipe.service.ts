@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { Subject } from "rxjs/internal/Subject";
 import { Ingredient } from "../shared/model/ingredient.model";
 import { ShoppingListService } from "../shopping-list/shopping-list.service";
 
@@ -7,7 +8,8 @@ import { Recipe } from "./recipe.model";
 @Injectable()
 
 export class RecipeService {
-
+    recipesChanged = new Subject<Recipe[]>();
+    
     private recipes: Recipe[]= [
         new Recipe("Tasty Schnitzel","Test Description for one",
         "https://images.immediate.co.uk/production/volatile/sites/30/2021/08/Sausage-and-mushroom-ragu-203c7d4.jpg?quality=90&resize=960,872",
@@ -37,4 +39,13 @@ export class RecipeService {
        this.slService.addIngredients(ingredients);
     }
 
+    addRecipe(recipe: Recipe) {
+      this.recipes.push(recipe);
+      this.recipesChanged.next(this.recipes.slice());
+    }
+
+    updateRecipe(index: number, newRecipe: Recipe) {
+      this.recipes[index] = newRecipe;
+      this.recipesChanged.next(this.recipes.slice());
+    }
 }
