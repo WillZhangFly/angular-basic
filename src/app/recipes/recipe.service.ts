@@ -10,20 +10,7 @@ import { Recipe } from "./recipe.model";
 export class RecipeService {
     recipesChanged = new Subject<Recipe[]>();
     
-    private recipes: Recipe[]= [
-        new Recipe("Tasty Schnitzel","Test Description for one",
-        "https://images.immediate.co.uk/production/volatile/sites/30/2021/08/Sausage-and-mushroom-ragu-203c7d4.jpg?quality=90&resize=960,872",
-        [
-            new Ingredient('Meat',1),
-            new Ingredient('French Fries', 20)
-        ]),
-        new Recipe("Big Fat Burger","Test Description",
-        "https://images.immediate.co.uk/production/volatile/sites/30/2021/08/Sausage-and-mushroom-ragu-203c7d4.jpg?quality=90&resize=960,872",
-        [
-            new Ingredient('Buns',2),
-            new Ingredient('Meat', 20)
-        ])
-    ];
+    private recipes: Recipe[] = [];
 
     constructor(private slService: ShoppingListService){}
     setRecipes(recipes : Recipe[]) {
