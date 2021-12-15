@@ -35,7 +35,6 @@ export class AuthComponent {
 
     this.authObs.subscribe(
       (resData) => {
-        console.log('resData ', resData);
         this.isLoading = false;
         this.router.navigate(['./recipes']);
       },
