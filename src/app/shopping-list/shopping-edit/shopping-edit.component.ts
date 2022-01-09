@@ -5,6 +5,8 @@ import { Subscription } from 'rxjs';
 import { Ingredient } from 'src/app/shared/model/ingredient.model';
 import { ShoppingListService } from '../shopping-list.service';
 import * as SLAction from "../store/shopping-list.action";
+import * as fromShoppingList from '../store/shopping-list.reducer';
+
 
 @Component({
   selector: 'app-shopping-edit',
@@ -18,9 +20,7 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
   editedItemIndex:number;
   editedItem: Ingredient;
   
-  constructor(private slService: ShoppingListService , private store : Store<{shoppingList: {
-    ingredients: Ingredient[]
-  }}>) { }
+  constructor(private slService: ShoppingListService , private store : Store<fromShoppingList.AppState>) { }
 
   ngOnInit(): void {
     this.subscription = this.slService.startedEditing.subscribe(

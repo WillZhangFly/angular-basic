@@ -3,6 +3,7 @@ import { Store } from "@ngrx/store";
 import { Subject } from "rxjs/internal/Subject";
 import { Ingredient } from "../shared/model/ingredient.model";
 import * as SLAction from "../shopping-list/store/shopping-list.action";
+import * as fromShoppingList from '../shopping-list/store/shopping-list.reducer';
 
 import { Recipe } from "./recipe.model";
 
@@ -13,9 +14,7 @@ export class RecipeService {
     
     private recipes: Recipe[] = [];
 
-    constructor(private store : Store<{shoppingList: {
-        ingredients: Ingredient[]
-      }}>){}
+    constructor(private store : Store<fromShoppingList.AppState>){}
     setRecipes(recipes : Recipe[]) {
         this.recipes = recipes;
         this.recipesChanged.next([...this.recipes]);
