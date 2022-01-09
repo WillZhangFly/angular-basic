@@ -17,31 +17,30 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
   @ViewChild('shoppingForm',{static: false}) shoppingForm: NgForm;
   subscription: Subscription;
   editMode:boolean = false;
-  editedItemIndex:number;
   editedItem: Ingredient;
   
-  constructor(private slService: ShoppingListService , private store : Store<fromShoppingList.AppState>) { }
+  constructor(private store : Store<fromShoppingList.AppState>) { }
 
   ngOnInit(): void {
-    this.subscription = this.slService.startedEditing.subscribe(
-      (index:number) => {
-         this.editMode = true;
-         this.editedItemIndex = index;
-         this.editedItem = this.slService.getIngredient(index);
-         const {name , amount} = this.editedItem;
-         this.shoppingForm.setValue({
-           name,
-           amount
-         });
+    this.subscription = this.store.select('shoppingList').subscribe(stateData => {
+      if(stateData.editedIngredientIndex > -1){
+        this.editMode = true;
+        this.editedItem = stateData.editedIngredient;
+        this.shoppingForm.setValue({
+          name: this.editedItem.name,
+          amount: this.editedItem.amount
+        });
+      }else{
+        this.editMode = false;
       }
-    );
+    })
   }
 
   addToShoppingList(form: NgForm) {
     const {name , amount} = form.value;
     const newIngredient = new Ingredient(name, amount);
     if(this.editMode){
-      this.store.dispatch(new SLAction.UpdateIngredient({index: this.editedItemIndex, ingredient:newIngredient })); 
+      this.store.dispatch(new SLAction.UpdateIngredient(newIngredient )); 
     }else{
       this.store.dispatch(new SLAction.AddIngredient(newIngredient)); 
     }
@@ -50,16 +49,18 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
   }
 
   onDelete() {
-    this.store.dispatch(new SLAction.DeleteIngredient(this.editedItemIndex)); 
+    this.store.dispatch(new SLAction.DeleteIngredient()); 
     this.onClear();
   }
 
   onClear() {
     this.shoppingForm.reset();
     this.editMode = false;
+    this.store.dispatch(new SLAction.StopEdit());
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+    this.store.dispatch(new SLAction.StopEdit());
   }
 }
