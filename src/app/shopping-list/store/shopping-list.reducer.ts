@@ -1,4 +1,3 @@
-import { Action } from '@ngrx/store';
 import { Ingredient } from 'src/app/shared/model/ingredient.model';
 import * as ShoppingListActions from './shopping-list.action';
 
