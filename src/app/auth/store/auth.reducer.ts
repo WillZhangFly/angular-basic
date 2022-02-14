@@ -1,10 +1,10 @@
 import { User } from '../user.model';
 import {
   AuthActions,
-  LOGIN,
   LOGIN_START,
-  LOGIN_FAIL,
   LOGOUT,
+  AUTHENTICATE_FAIL,
+  AUTHENTICATE_SUCCESS,
 } from './auth.actions';
 
 export interface State {
@@ -21,7 +21,7 @@ const initialState: State = {
 
 export function authReducer(state = initialState, action: AuthActions) {
   switch (action.type) {
-    case LOGIN:
+    case AUTHENTICATE_SUCCESS:
       const { email, userId, token, expirationDate } = action.payload;
       const user = new User(email, userId, token, expirationDate);
       return {
@@ -41,7 +41,7 @@ export function authReducer(state = initialState, action: AuthActions) {
         authError: null,
         loading: true
       };
-    case LOGIN_FAIL:
+    case AUTHENTICATE_FAIL:
       return {
         ...state,
         user: null,
