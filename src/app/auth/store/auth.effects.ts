@@ -5,6 +5,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { User } from '../user.model';
 import {
   LOGIN_START,
   LoginStart,
@@ -14,6 +15,7 @@ import {
   SIGNUP_START,
   SignupStart,
   LOGOUT,
+  AUTO_LOGIN,
 } from './auth.actions';
 
 export interface AuthResponseData {
@@ -30,31 +32,35 @@ const handleAuthentication = (resData: any) => {
   const expirationDate = new Date(
     new Date().getTime() + +resData.expiresIn * 1000
   );
+  const { email, userId, idToken } = resData;
+  const user = new User(email, userId, idToken, expirationDate);
+  localStorage.setItem('userData', JSON.stringify(user));
+
   return new AuthenticateSuccess({
-    email: resData.email,
-    userId: resData.idToken,
-    token: resData.idToken,
+    email,
+    userId,
+    token: idToken,
     expirationDate,
   });
-}
+};
 
 const handleError = (errorResponse: any) => {
   let errorMessage = 'An unknown error occurred!';
-              if (!errorResponse.error || !errorResponse.error.error) {
-                return of(new AuthenticateFail(errorMessage));
-              }
-              switch (errorResponse?.error?.error?.message) {
-                case 'EMAIL_EXISTS':
-                  errorMessage = 'This email exists already';
-                  break;
-                case 'EMAIL_NOT_FOUND':
-                  errorMessage = 'This email does not exist.';
-                  break;
-                case 'INVALID_PASSWORD':
-                  errorMessage = 'This password is not correct.';
-                  break;
-              }
-              return of(new AuthenticateFail(errorMessage));
+  if (!errorResponse.error || !errorResponse.error.error) {
+    return of(new AuthenticateFail(errorMessage));
+  }
+  switch (errorResponse?.error?.error?.message) {
+    case 'EMAIL_EXISTS':
+      errorMessage = 'This email exists already';
+      break;
+    case 'EMAIL_NOT_FOUND':
+      errorMessage = 'This email does not exist.';
+      break;
+    case 'INVALID_PASSWORD':
+      errorMessage = 'This password is not correct.';
+      break;
+  }
+  return of(new AuthenticateFail(errorMessage));
 };
 
 @Injectable()
@@ -122,6 +128,55 @@ export class AuthEffects {
     },
     { dispatch: false }
   );
+
+  autoLogin = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(AUTO_LOGIN),
+      map(() => {
+        const userData = JSON.parse(localStorage.getItem('userData'));
+
+        if (!userData) {
+          return {type: 'DUMMY'};
+        }
+
+        const { email, id, _token, _tokenExpirationDate } = userData;
+
+        const loadedUser = new User(
+          email,
+          id,
+          _token,
+          new Date(_tokenExpirationDate)
+        );
+        if (loadedUser.token) {
+          return new AuthenticateSuccess({
+            email: loadedUser.email,
+            userId: loadedUser.id,
+            token: loadedUser.token,
+            expirationDate: new Date(userData._tokenExpirationDate),
+          });
+
+          // const expirationDuration =
+          //   new Date(userData._tokenExpirationDate).getTime() -
+          //   new Date().getTime();
+          // this.autoLogout(expirationDuration);
+        }
+        return {type: 'DUMMY'};
+      })
+    );
+  });
+
+  authLogout = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(LOGOUT),
+        tap(() => {
+          localStorage.removeItem('userData');
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
   constructor(
     private actions$: Actions,
     private http: HttpClient,
