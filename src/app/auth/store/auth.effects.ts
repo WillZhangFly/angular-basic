@@ -5,7 +5,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { EMPTY, of } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { LOGIN_START, LoginStart, Login, LOGIN } from './auth.actions';
+import { LOGIN_START, LoginStart, Login, LOGIN, LoginFail } from './auth.actions';
 
 export interface AuthResponseData {
   kind: string;
@@ -45,8 +45,23 @@ export class AuthEffects {
                 expirationDate,
               });
             }),
-            catchError((error) => {
-              return EMPTY;
+            catchError((errorResponse) => {
+              let errorMessage = 'An unknown error occurred!';
+              if(!errorResponse.error || !errorResponse.error.error){
+                return of(new LoginFail(errorMessage));
+              }
+              switch (errorResponse?.error?.error?.message) {
+                case 'EMAIL_EXISTS':
+                  errorMessage = 'This email exists already';
+                  break;
+                case 'EMAIL_NOT_FOUND':
+                  errorMessage = 'This email does not exist.';
+                  break;
+                case 'INVALID_PASSWORD':
+                  errorMessage = 'This password is not correct.';
+                  break;
+              }
+              return of(new LoginFail(errorMessage));
             })
           );
       })
