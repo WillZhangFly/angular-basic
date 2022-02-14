@@ -5,6 +5,8 @@ import {
   LOGOUT,
   AUTHENTICATE_FAIL,
   AUTHENTICATE_SUCCESS,
+  SIGNUP_START,
+  CLEAR_ERROR,
 } from './auth.actions';
 
 export interface State {
@@ -36,6 +38,7 @@ export function authReducer(state = initialState, action: AuthActions) {
         user: null,
       };
     case LOGIN_START:
+    case SIGNUP_START:
       return {
         ...state,
         authError: null,
@@ -48,6 +51,11 @@ export function authReducer(state = initialState, action: AuthActions) {
         authError: action.payload,
         loading: false
       };
+    case CLEAR_ERROR:
+      return {
+        ...state,
+        authError: null
+      }  
     default:
       return state;
   }
