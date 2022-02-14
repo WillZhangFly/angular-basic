@@ -13,6 +13,7 @@ import {
   AuthenticateSuccess,
   SIGNUP_START,
   SignupStart,
+  LOGOUT,
 } from './auth.actions';
 
 export interface AuthResponseData {
@@ -110,10 +111,10 @@ export class AuthEffects {
     );
   });
 
-  authSuccess = createEffect(
+  authRedirect = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(AUTHENTICATE_SUCCESS),
+        ofType(AUTHENTICATE_SUCCESS, LOGOUT),
         tap(() => {
           this.router.navigate(['/']);
         })
